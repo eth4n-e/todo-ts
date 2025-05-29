@@ -1,19 +1,28 @@
 {
   "name": "todo-ts",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A Todo App",
   "dependencies": {
     "commander": "^14.0.0"
   },
   "devDependencies": {
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.15.24",
+    "@types/sinon": "^17.0.4",
+    "@types/sinon-chai": "^4.0.0",
+    "chai": "^5.2.0",
+    "mocha": "^11.5.0",
+    "sinon": "^20.0.0",
+    "sinon-chai": "^4.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
