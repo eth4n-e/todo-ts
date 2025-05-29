@@ -1,6 +1,6 @@
-import { Task, Priority } from './models.js';
-import fs from 'fs';
-import path from 'path';
+import { Task, Priority } from './models';
+// import fs from 'fs';
+// import path from 'path';
 
 // purpose: read from / write data to todos.json
 export function loadTasks(): Task[] {

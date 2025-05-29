@@ -1,12 +1,12 @@
 import { describe, it } from 'mocha'; // testing framework / environment
-import chai from 'chai'; // assertion library, using named imports
+import * as chai from 'chai'; // assertion library, using named imports
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai'; // integrates sinon's spies, stubs, etc. with chai's interface
-import * as manager from '../todo/manager.js';
-import * as storage from '../todo/storage.js';
+// import * as manager from '../todo/manager';
+// import * as storage from '../todo/storage';
 
 chai.use(sinonChai);
-const expect = chai.expect;
+// const expect = chai.expect;
 
 // describes test suite
 describe("Task Manager", () => {
