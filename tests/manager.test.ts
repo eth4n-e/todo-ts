@@ -19,18 +19,16 @@ describe("Task Manager", () => {
   let saveMock: sinon.SinonStub;
 
   // data mocks
-  const newTask = {
+  const newTaskData = {
     desc: "new task",
-    priority: Priority.Low,
+    priority: Priority.LOW,
     duration: 1,
   };
 
   const taskMock = {
     id: 1,
-    desc: "mock task", 
-    priority: Priority.Medium,
-    duration: 2,
-    done: false
+    done: false,
+    ...newTaskData
   };
 
   // creates array with mock tasks with unique ids
@@ -53,13 +51,19 @@ describe("Task Manager", () => {
   // individual test scenarios
   it("adds a task to storage", () => {
     // want to figure out how to destructure this 
-    manager.addTask(newTask.desc, newTask.priority, newTask.duration);
+    manager.addTask(newTaskData.desc, newTaskData.priority, newTaskData.duration);
     expect(saveMock).to.have.been.called;
-    expect(saveMock).to.have.been.calledWith(newTask);
+    // argument to saveTasks is array, get first element
+    const savedTask = saveMock.getCall(0).args[0][0];
+    // addTask should create a valid Task from the desc, priority, and duration
+    expect(savedTask).to.haveOwnProperty('id');
+    expect(savedTask).to.haveOwnProperty('done');
   });    
 
   it("removes a task from storage", () => {
     loadMock.returns(mockTasks);
+    const id = mockTasks[0].id;
+    manager.removeTask(id);
   });
 
   it("lists all tasks", () => {

@@ -4,6 +4,7 @@
         "allowJs": true,
         "emitDecoratorMetadata": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
         "lib": ["dom", "es2017", "es2018", "esnext"],
         "module": "commonjs",
@@ -18,7 +19,7 @@
         "target": "es2018",
         "declaration": true,
         "forceConsistentCasingInFileNames": true,
-        "typeRoots": ["./node_modules/@types/", "./todo/models.ts"]
+        "typeRoots": ["./node_modules/@types/"]
     },
     "include": [
         "todo/**/*",
