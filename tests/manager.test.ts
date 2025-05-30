@@ -61,9 +61,19 @@ describe("Task Manager", () => {
   });    
 
   it("removes a task from storage", () => {
+    // simulating mockTasks existing in storage
     loadMock.returns(mockTasks);
     const id = mockTasks[0].id;
+
+    // removeTask should load and update (save) tasks
     manager.removeTask(id);
+    expect(loadMock).to.have.been.called;
+    expect(saveMock).to.have.been.called;
+
+    const expectedTasks = mockTasks.filter((task) => task.id != id);
+    expect(saveMock).to.have.been.called;
+    // should save all tasks excluding task to remove
+    expect(saveMock).to.have.been.calledWith(expectedTasks);
   });
 
   it("lists all tasks", () => {
