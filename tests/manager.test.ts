@@ -15,8 +15,8 @@ describe("Task Manager", () => {
   const sandbox = sinon.createSandbox();
 
   // store stubs (mocked functions)
-  let loadMock: sinon.SinonStub;
-  let saveMock: sinon.SinonStub;
+  let loadTasksMock: sinon.SinonStub;
+  let saveTasksMock: sinon.SinonStub;
 
   // data mocks
   const newTaskData = {
@@ -32,15 +32,15 @@ describe("Task Manager", () => {
   };
 
   // creates array with mock tasks with unique ids
-  const mockTasks: Task[] = new Array(3)
-    .fill(taskMock)
-    .map((task, idx) => task.id += idx); // map to create unique indices 
+  const mockTasks: Task[] = new Array(3).fill(taskMock);
+  // create unique ids 
+  mockTasks.forEach((task, idx) => task.id += idx); 
   
   beforeEach(() => {
     // create stubs of storage functions
     // stub ~ mock of function
-    loadMock = sandbox.stub(storage, "loadTasks");
-    saveMock = sandbox.stub(storage, "saveTasks");
+    loadTasksMock = sandbox.stub(storage, "loadTasks");
+    saveTasksMock = sandbox.stub(storage, "saveTasks");
   })
 
   // cleanup 
@@ -52,9 +52,9 @@ describe("Task Manager", () => {
   it("adds a task to storage", () => {
     // want to figure out how to destructure this 
     manager.addTask(newTaskData.desc, newTaskData.priority, newTaskData.duration);
-    expect(saveMock).to.have.been.called;
+    expect(saveTasksMock).to.have.been.called;
     // argument to saveTasks is array, get first element
-    const savedTask = saveMock.getCall(0).args[0][0];
+    const savedTask = saveTasksMock.getCall(0).args[0][0];
     // addTask should create a valid Task from the desc, priority, and duration
     expect(savedTask).to.haveOwnProperty('id');
     expect(savedTask).to.haveOwnProperty('done');
@@ -62,41 +62,81 @@ describe("Task Manager", () => {
 
   it("removes a task from storage", () => {
     // simulating mockTasks existing in storage
-    loadMock.returns(mockTasks);
+    loadTasksMock.returns(mockTasks);
     const id = mockTasks[0].id;
 
     // removeTask should load and update (save) tasks
     manager.removeTask(id);
-    expect(loadMock).to.have.been.called;
-    expect(saveMock).to.have.been.called;
+    expect(loadTasksMock).to.have.been.called;
+    expect(saveTasksMock).to.have.been.called;
 
     const expectedTasks = mockTasks.filter((task) => task.id != id);
-    expect(saveMock).to.have.been.called;
+    expect(saveTasksMock).to.have.been.called;
     // should save all tasks excluding task to remove
-    expect(saveMock).to.have.been.calledWith(expectedTasks);
+    expect(saveTasksMock).to.have.been.calledWith(expectedTasks);
   });
 
   it("lists all tasks", () => {
     // control return value of loadTasks using stub
-    loadMock.returns([]);
+    loadTasksMock.returns([]);
     const tasks: Task[] = manager.listTasks();
-    expect(loadMock).to.have.been.called;
+    expect(loadTasksMock).to.have.been.called;
     expect(tasks).to.be.empty;
   });
 
   it("updates a task's status", () => {
-    // call updateStatus
-    // check that loadMock has been called
-    // check that saveMock been called
-    // assert that task's status was updated (compare before and after)
+    loadTasksMock.returns(mockTasks);
+    // first tasks data
+    const task = mockTasks[0];
+    const initStatus = task.done;
+
+    // note: status is boolean, value flipped in update method 
+    manager.updateStatus(task.id);
+    expect(loadTasksMock).to.have.been.called;
+    expect(saveTasksMock).to.have.been.called;
+    // first arg to saveTasks is updated task
+    const updatedTask = saveTasksMock.getCall(0).args[0][0];
+    expect(updatedTask.done).to.not.equal(initStatus);
+    // check that other propert(y)(ies) have not been augmented
+    expect(updatedTask.id).to.equal(task.id);
+    expect(updatedTask.priority).to.equal(task.priority);
   });
 
   it("updates a task's priority", () => {
-    // similar to update a tasks status    
+    loadTasksMock.returns(mockTasks);
+    // first tasks data
+    const task = mockTasks[0];
+    // initPriority = LOW
+    const initPriority = task.priority; 
+    const newPriority = Priority.HIGH;
+
+    manager.updatePriority(task.id, newPriority);
+    expect(loadTasksMock).to.have.been.called;
+    expect(saveTasksMock).to.have.been.called;
+    // first arg to saveTasks is updated task
+    const updatedTask = saveTasksMock.getCall(0).args[0][0];
+    expect(updatedTask.priority).to.not.equal(initPriority);
+    // check that other propert(y)(ies) have not been augmented
+    expect(updatedTask.id).to.equal(task.id);
+    expect(updatedTask.duration).to.equal(task.duration);
   });
 
   it("updates a task's duration", () => {
-    // similar to update a tasks status    
+    loadTasksMock.returns(mockTasks); 
+    // first tasks data
+    const task = mockTasks[0];
+    const initDuration = task.duration;
+    const newDuration = initDuration + 1;
+
+    manager.updateDuration(task.id, newDuration);
+    expect(loadTasksMock).to.have.been.called;
+    expect(saveTasksMock).to.have.been.called;
+    // first arg to saveTasks is updated task
+    const updatedTask = saveTasksMock.getCall(0).args[0][0];
+    expect(updatedTask.duration).to.not.equal(initDuration);
+    // check that other propert(y)(ies) have not been augmented
+    expect(updatedTask.id).to.equal(task.id);
+    expect(updatedTask.priority).to.equal(task.priority);
   });
 
 });
