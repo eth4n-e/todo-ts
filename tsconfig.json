@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "outDir": "./dist",
+        "rootDir": "src",
         "allowJs": true,
         "emitDecoratorMetadata": true,
         "esModuleInterop": true,
@@ -22,7 +23,6 @@
         "typeRoots": ["./node_modules/@types/"]
     },
     "include": [
-        "todo/**/*",
-        "tests/**/*"
+      "src/**/*"
     ]
 }
