@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "clean": "rm -rf node_modules && npm install",
+    "start": "npm run build && ts-node src/index.ts",
     "build": "npx tsc",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
@@ -12,6 +14,7 @@
   "description": "A Todo App",
   "dependencies": {
     "commander": "^14.0.0",
+    "inquirer": "^12.6.3",
     "yargs-parser": "^22.0.0"
   },
   "devDependencies": {

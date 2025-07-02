@@ -1,18 +1,18 @@
-// Purpose: manage adding, removing, filtering, etc. tasks
-import { Task, Priority } from './models';
-import { saveTasks, loadTasks } from './storage';
+import { Task, Priority, TaskData } from "./models";
+import { saveTasks, loadTasks } from "./storage";
 
 let UNIQUE_ID = 1;
 const DEFAULT_DONE = false;
 
-export function addTask(desc: string, priority: Priority, duration: number) {
+// Purpose: manage adding, removing, filtering, etc. tasks
+export function addTask(taskData: TaskData) {
   const task: Task = {
     id: UNIQUE_ID++,
-    desc: desc,
-    priority: priority,
-    duration: duration,
-    done: DEFAULT_DONE
-  }
+    desc: taskData.desc,
+    priority: taskData.priority,
+    duration: taskData.duration,
+    done: taskData.done ? taskData.done : DEFAULT_DONE,
+  };
 
   saveTasks(Array.of(task));
 }
