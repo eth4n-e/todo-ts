@@ -8,10 +8,8 @@ const DEFAULT_DONE = false;
 export function addTask(taskData: TaskData) {
   const task: Task = {
     id: UNIQUE_ID++,
-    desc: taskData.desc,
-    priority: taskData.priority,
-    duration: taskData.duration,
     done: taskData.done ? taskData.done : DEFAULT_DONE,
+    ...taskData,
   };
 
   saveTasks(Array.of(task));

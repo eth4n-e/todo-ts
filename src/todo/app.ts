@@ -30,6 +30,6 @@ export async function startApp() {
       ],
     });
 
-    delegateAction(action);
+    await delegateAction(action);
   } while (action != Choice.QUIT);
 }

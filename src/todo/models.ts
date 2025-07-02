@@ -21,7 +21,8 @@ export const Choice = {
 export type Choice = (typeof Choice)[keyof typeof Choice];
 
 export type TaskData = {
-  desc: string;
+  name: string;
+  description: string;
   priority: Priority;
   duration: number;
   done?: boolean;
@@ -29,7 +30,8 @@ export type TaskData = {
 
 export type Task = {
   id: number;
-  desc: string;
+  name: string;
+  description: string;
   priority: Priority;
   duration: number;
   done: boolean;
