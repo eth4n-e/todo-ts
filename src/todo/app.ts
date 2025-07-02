@@ -1,5 +1,6 @@
 import { rawlist } from "@inquirer/prompts";
 import { Choice } from "./models";
+import { delegateAction } from "./handler";
 
 export async function startApp() {
   // while loop to handle user input
@@ -17,14 +18,18 @@ export async function startApp() {
    * 5) Sort tasks - sublevels: by priority, duration, etc.
    * 6) Quit
    */
+  let action: Choice;
 
-  let action: Choice = await rawlist({
-    message: "Enter option",
-    choices: [
-      { name: "Add task", value: Choice.ADD },
-      { name: "Remove task", value: Choice.REMOVE },
-    ],
-  });
+  do {
+    action = await rawlist({
+      message: "Enter option",
+      choices: [
+        { name: "Add task", value: Choice.ADD },
+        { name: "Remove task", value: Choice.REMOVE },
+        { name: "Quit", value: Choice.QUIT },
+      ],
+    });
 
-  console.log(action);
+    delegateAction(action);
+  } while (action != Choice.QUIT);
 }
