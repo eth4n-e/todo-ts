@@ -8,6 +8,7 @@
         "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
         "lib": ["dom", "es2017", "es2018", "esnext"],
+        "skipLibCheck": true,
         "module": "commonjs",
         "moduleResolution": "node",
         "noEmitOnError": true,
