@@ -29,7 +29,7 @@ export type TaskData = {
 };
 
 export type Task = {
-  id: number;
+  id: string;
   name: string;
   description: string;
   priority: Priority;

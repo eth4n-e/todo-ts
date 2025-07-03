@@ -2,9 +2,10 @@ import { describe, it } from "mocha"; // testing framework / environment
 import * as chai from "chai"; // assertion library, using named imports
 import sinon from "sinon";
 import sinonChai from "sinon-chai"; // integrates sinon's spies, stubs, etc. with chai's interface
-import { Task, Priority, TaskData } from "../todo/models";
-import * as manager from "../todo/manager";
-import * as storage from "../todo/storage";
+import { v4 as uuidv4 } from "uuid";
+import { Task, Priority, TaskData } from "../src/todo/models";
+import * as manager from "../src/todo/manager";
+import * as storage from "../src/todo/storage";
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -19,22 +20,21 @@ describe("Task Manager", () => {
   let saveTasksMock: sinon.SinonStub;
 
   // data mocks
-  const newTaskData: TaskData = {
-    desc: "new task",
+  const mockTaskData: TaskData = {
+    name: "new task",
+    description: "new task description",
     priority: Priority.LOW,
     duration: 1,
   };
 
-  const taskMock = {
-    id: 1,
-    done: false,
-    ...newTaskData,
-  };
-
-  // creates array with mock tasks with unique ids
-  const mockTasks: Task[] = new Array(3).fill(taskMock);
-  // create unique ids
-  mockTasks.forEach((task, idx) => (task.id += idx));
+  const mockTasksData: TaskData[] = new Array(3).fill(mockTaskData);
+  const mockTasks: Task[] = mockTasksData.map((data) => {
+    return {
+      id: uuidv4(),
+      done: false,
+      ...data,
+    };
+  });
 
   beforeEach(() => {
     // create stubs of storage functions
@@ -50,30 +50,20 @@ describe("Task Manager", () => {
 
   // individual test scenarios
   it("adds a task to storage", () => {
-    // want to figure out how to destructure this
-    manager.addTask({ ...newTaskData });
-    expect(saveTasksMock).to.have.been.called;
-    // argument to saveTasks is array, get first element
-    const savedTask = saveTasksMock.getCall(0).args[0][0];
-    // addTask should create a valid Task from the desc, priority, and duration
-    expect(savedTask).to.haveOwnProperty("id");
-    expect(savedTask).to.haveOwnProperty("done");
+    const initTasksLength = mockTasks.length;
+    loadTasksMock.returns(mockTasks);
+    const updatedTasks = manager.addTaskToList({ ...mockTaskData });
+    expect(loadTasksMock).to.have.been.called;
+    expect(updatedTasks.length).to.be.greaterThan(initTasksLength);
   });
 
   it("removes a task from storage", () => {
-    // simulating mockTasks existing in storage
-    loadTasksMock.returns(mockTasks);
+    const initTasksLength = mockTasks.length;
     const id = mockTasks[0].id;
+    const updatedTasks = manager.removeTaskFromList(id, mockTasks);
 
-    // removeTask should load and update (save) tasks
-    manager.removeTask(id);
-    expect(loadTasksMock).to.have.been.called;
-    expect(saveTasksMock).to.have.been.called;
-
-    const expectedTasks = mockTasks.filter((task) => task.id != id);
-    expect(saveTasksMock).to.have.been.called;
-    // should save all tasks excluding task to remove
-    expect(saveTasksMock).to.have.been.calledWith(expectedTasks);
+    expect(updatedTasks.length).to.be.lessThan(initTasksLength);
+    expect(updatedTasks.some((task) => task.id === id)).to.be.false;
   });
 
   it("lists all tasks", () => {

@@ -1,36 +1,37 @@
 import { Task, Priority, TaskData } from "./models";
 import { saveTasks, loadTasks } from "./storage";
+import { v4 as uuidv4 } from "uuid";
 
-let UNIQUE_ID = 1;
 const DEFAULT_DONE = false;
 
 // Purpose: manage adding, removing, filtering, etc. tasks
-export function addTask(taskData: TaskData) {
+export function addTaskToList(taskData: TaskData) {
+  // maybe call create task
   const task: Task = {
-    id: UNIQUE_ID++,
+    id: uuidv4(),
     done: taskData.done ? taskData.done : DEFAULT_DONE,
     ...taskData,
   };
 
-  saveTasks(Array.of(task));
+  const tasks = loadTasks();
+  tasks.push(task);
+  return tasks;
 }
 
-export function removeTask(id: number) {
-  const tasks: Task[] = loadTasks();
+export function removeTaskFromList(id: string, tasks: Task[]) {
   // remove task from list
-  const filteredTasks: Task[] = tasks.filter((task) => task.id != id);
-  saveTasks(filteredTasks);
+  return tasks.filter((task) => task.id !== id);
 }
 
 export function listTasks(): Task[] {
   return loadTasks();
 }
 
-export function updateStatus(id: number) {
+export function updateStatus(id: string) {
   const tasks: Task[] = loadTasks();
   // update tasks in place
   tasks.forEach((task) => {
-    if (task.id == id) {
+    if (task.id === id) {
       task.done = !task.done;
     }
   });
@@ -38,11 +39,11 @@ export function updateStatus(id: number) {
   saveTasks(tasks);
 }
 
-export function updatePriority(id: number, priority: Priority) {
+export function updatePriority(id: string, priority: Priority) {
   const tasks: Task[] = loadTasks();
   // update tasks in place
   tasks.forEach((task) => {
-    if (task.id == id) {
+    if (task.id === id) {
       task.priority = priority;
     }
   });
@@ -50,11 +51,11 @@ export function updatePriority(id: number, priority: Priority) {
   saveTasks(tasks);
 }
 
-export function updateDuration(id: number, duration: number) {
+export function updateDuration(id: string, duration: number) {
   const tasks: Task[] = loadTasks();
   // update tasks in place
   tasks.forEach((task) => {
-    if (task.id == id) {
+    if (task.id === id) {
       task.duration = duration;
     }
   });

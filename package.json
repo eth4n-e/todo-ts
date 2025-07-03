@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "clean": "rm -rf node_modules && npm install",
+    "clean": "rm -rf node_modules package-lock.json && npm install",
     "start": "npm run build && ts-node src/index.ts",
     "build": "npx tsc",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
@@ -15,6 +15,7 @@
   "dependencies": {
     "commander": "^14.0.0",
     "inquirer": "^12.6.3",
+    "uuid": "^11.1.0",
     "yargs-parser": "^22.0.0"
   },
   "devDependencies": {

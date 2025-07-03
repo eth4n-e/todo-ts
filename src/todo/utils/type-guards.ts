@@ -6,8 +6,10 @@ export function isValidTask(obj: any): obj is Task {
     obj !== null &&
     "id" in obj &&
     typeof obj.id === "string" &&
-    "desc" in obj &&
-    typeof obj.desc === "string" &&
+    "name" in obj &&
+    typeof obj.name === "string" &&
+    "description" in obj &&
+    typeof obj.description === "string" &&
     "priority" in obj &&
     typeof obj.priority === "string" &&
     "duration" in obj &&

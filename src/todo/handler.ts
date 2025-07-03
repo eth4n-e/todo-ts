@@ -1,7 +1,7 @@
 import { input, rawlist, number } from "@inquirer/prompts";
 import { Choice, Priority, TaskData, Task } from "./models";
-// import { loadTasks, saveTasks } from "./storage";
-// import * as TaskManager from "./manager";
+import { loadTasks, saveTasks } from "./storage";
+import * as TaskManager from "./manager";
 
 export async function delegateAction(action: Choice) {
   switch (action) {
@@ -14,6 +14,7 @@ export async function delegateAction(action: Choice) {
     case Choice.MODIFY:
       break;
     case Choice.LIST:
+      await handleList();
       break;
     case Choice.SORT:
       break;
@@ -26,8 +27,6 @@ export async function delegateAction(action: Choice) {
 }
 
 export async function handleAdd() {
-  console.log("in add handler");
-
   // new tasks by default are unfinished
   const task: TaskData = {
     name: await input({
@@ -54,8 +53,8 @@ export async function handleAdd() {
     }),
   };
 
-  console.log("Task: ", task);
-  // TaskManager.addTask(task);
+  const updatedTasks = TaskManager.addTaskToList(task);
+  saveTasks(updatedTasks);
 }
 
 export async function handleRemove() {
@@ -65,17 +64,7 @@ export async function handleRemove() {
    * 2) Format: id, description, done
    */
 
-  // const tasks: Task[] = loadTasks();
-  const tasks: Task[] = [
-    {
-      id: 1,
-      name: "Test1",
-      description: "Test task",
-      priority: Priority.LOW,
-      duration: 30,
-      done: false,
-    },
-  ];
+  const tasks: Task[] = loadTasks();
 
   const choices = tasks.map((task) => {
     return {
@@ -93,13 +82,22 @@ export async function handleRemove() {
   //     choices: choices
   //   }
   // ]);
-  const taskIdToRemove = await rawlist({
+  const taskIdToRemove: string = await rawlist({
     message: "Select a task to remove:",
     choices: choices,
   });
 
-  console.log("Task id: ", taskIdToRemove);
-  // TaskManager.removeTask(taskIdToRemove);
+  const updatedTasks = TaskManager.removeTaskFromList(taskIdToRemove, tasks);
+  saveTasks(updatedTasks);
 }
 
-export async function handleList() {}
+export async function handleList() {
+  const tasks = loadTasks();
+  tasks.forEach((task) => {
+    console.log("------------------------------------------------------------");
+    console.log(
+      `Name: ${task.name} | Priority: ${task.priority} | Duration: ${task.duration} | Completed: ${task.done}`,
+    );
+    console.log("------------------------------------------------------------");
+  });
+}

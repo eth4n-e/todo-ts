@@ -26,6 +26,7 @@ export async function startApp() {
       choices: [
         { name: "Add task", value: Choice.ADD },
         { name: "Remove task", value: Choice.REMOVE },
+        { name: "List tasks", value: Choice.LIST },
         { name: "Quit", value: Choice.QUIT },
       ],
     });
