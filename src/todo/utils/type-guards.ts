@@ -14,7 +14,7 @@ export function isValidTask(obj: any): obj is Task {
     typeof obj.priority === "string" &&
     "duration" in obj &&
     typeof obj.duration === "number" &&
-    "done" in obj &&
-    typeof obj.done === "boolean"
+    "complete" in obj &&
+    typeof obj.complete === "boolean"
   );
 }

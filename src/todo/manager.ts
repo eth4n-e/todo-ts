@@ -2,14 +2,14 @@ import { Task, Priority, TaskData } from "./models";
 import { saveTasks, loadTasks } from "./storage";
 import { v4 as uuidv4 } from "uuid";
 
-const DEFAULT_DONE = false;
+const DEFAULT_IS_COMPLETE = false;
 
 // Purpose: manage adding, removing, filtering, etc. tasks
 export function addTaskToList(taskData: TaskData) {
   // maybe call create task
   const task: Task = {
     id: uuidv4(),
-    done: taskData.done ? taskData.done : DEFAULT_DONE,
+    isComplete: taskData.isComplete ? taskData.isComplete : DEFAULT_IS_COMPLETE,
     ...taskData,
   };
 
@@ -32,7 +32,7 @@ export function updateStatus(id: string) {
   // update tasks in place
   tasks.forEach((task) => {
     if (task.id === id) {
-      task.done = !task.done;
+      task.isComplete = !task.isComplete;
     }
   });
 

@@ -1,5 +1,13 @@
-import { input, rawlist, number } from "@inquirer/prompts";
-import { Choice, Priority, TaskData, Task } from "./models";
+import { input, rawlist, number, select } from "@inquirer/prompts";
+import {
+  TaskFields,
+  Choice,
+  Priority,
+  TaskData,
+  Task,
+  TaskFormatMode,
+} from "./models";
+import { formatTasks } from "./utils/helpers";
 import { loadTasks, saveTasks } from "./storage";
 import * as TaskManager from "./manager";
 
@@ -12,11 +20,13 @@ export async function delegateAction(action: Choice) {
       await handleRemove();
       break;
     case Choice.MODIFY:
+      await handleModify();
       break;
     case Choice.LIST:
       await handleList();
       break;
     case Choice.SORT:
+      await handleSort();
       break;
     case Choice.QUIT:
       break;
@@ -57,6 +67,31 @@ export async function handleAdd() {
   saveTasks(updatedTasks);
 }
 
+export async function handleModify() {
+  const tasks = loadTasks();
+  const formattedTasks = formatTasks(tasks, TaskFormatMode.CHOICE);
+
+  const taskIdToModify: string = await rawlist({
+    message: "Select a task to remove:",
+    choices: formattedTasks,
+  });
+
+  console.log("Task to modify: ", taskIdToModify);
+
+  const modifyField = await select({
+    message: "Enter property to modify:",
+    choices: [
+      { name: "Name", value: TaskFields.NAME },
+      { name: "Description", value: TaskFields.DESCRIPTION },
+      { name: "Duration", value: TaskFields.DURATION },
+      { name: "Priority", value: TaskFields.PRIORITY },
+      { name: "Completion Status", value: TaskFields.ISCOMPLETE },
+    ],
+  });
+
+  console.log("Field to modify: ", modifyField);
+}
+
 export async function handleRemove() {
   /*
    * Steps:
@@ -68,7 +103,7 @@ export async function handleRemove() {
 
   const choices = tasks.map((task) => {
     return {
-      name: `Id: ${task.id} | Name: ${task.name} | Priority: ${task.priority} | Completed: ${task.done}`,
+      name: `Name: ${task.name} | Priority: ${task.priority} | Completed: ${task.isComplete}`,
       value: task.id,
     };
   });
@@ -93,11 +128,25 @@ export async function handleRemove() {
 
 export async function handleList() {
   const tasks = loadTasks();
-  tasks.forEach((task) => {
+  const formattedTasks: String[] = formatTasks(tasks, TaskFormatMode.LABEL);
+  formattedTasks.forEach((task) => {
     console.log("------------------------------------------------------------");
-    console.log(
-      `Name: ${task.name} | Priority: ${task.priority} | Duration: ${task.duration} | Completed: ${task.done}`,
-    );
+    console.log(task);
     console.log("------------------------------------------------------------");
   });
+}
+
+export async function handleSort() {
+  // First prompt should display options to sort by (duration, done, etc.)
+  // response to prompt should then be passed
+  const sortBy = await select({
+    message: "Enter property to sort by:",
+    choices: [
+      { name: "Duration", value: TaskFields.DURATION },
+      { name: "Priority", value: TaskFields.PRIORITY },
+      { name: "Completed", value: TaskFields.ISCOMPLETE },
+    ],
+  });
+  console.log("Sort option: ", sortBy);
+  // sort tasks
 }

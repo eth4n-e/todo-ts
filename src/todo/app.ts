@@ -25,8 +25,10 @@ export async function startApp() {
       message: "Enter option",
       choices: [
         { name: "Add task", value: Choice.ADD },
+        { name: "Modify a task", value: Choice.MODIFY },
         { name: "Remove task", value: Choice.REMOVE },
         { name: "List tasks", value: Choice.LIST },
+        { name: "Sort tasks", value: Choice.SORT },
         { name: "Quit", value: Choice.QUIT },
       ],
     });

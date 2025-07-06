@@ -31,7 +31,7 @@ describe("Task Manager", () => {
   const mockTasks: Task[] = mockTasksData.map((data) => {
     return {
       id: uuidv4(),
-      done: false,
+      isComplete: false,
       ...data,
     };
   });
@@ -74,11 +74,11 @@ describe("Task Manager", () => {
     expect(tasks).to.be.empty;
   });
 
-  it("updates a task's status", () => {
+  it("updates a task's completion status", () => {
     loadTasksMock.returns(mockTasks);
     // first tasks data
     const task = mockTasks[0];
-    const initStatus = task.done;
+    const initStatus = task.isComplete;
 
     // note: status is boolean, value flipped in update method
     manager.updateStatus(task.id);
@@ -86,7 +86,7 @@ describe("Task Manager", () => {
     expect(saveTasksMock).to.have.been.called;
     // first arg to saveTasks is updated task
     const updatedTask = saveTasksMock.getCall(0).args[0][0];
-    expect(updatedTask.done).to.not.equal(initStatus);
+    expect(updatedTask.isComplete).to.not.equal(initStatus);
     // check that other propert(y)(ies) have not been augmented
     expect(updatedTask.id).to.equal(task.id);
     expect(updatedTask.priority).to.equal(task.priority);
