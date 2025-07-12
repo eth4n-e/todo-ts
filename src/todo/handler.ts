@@ -72,11 +72,9 @@ export async function handleModify() {
   const formattedTasks = formatTasks(tasks, TaskFormatMode.CHOICE);
 
   const taskIdToModify: string = await rawlist({
-    message: "Select a task to remove:",
+    message: "Select a task to modify:",
     choices: formattedTasks,
   });
-
-  console.log("Task to modify: ", taskIdToModify);
 
   const modifyField = await select({
     message: "Enter property to modify:",
@@ -89,7 +87,9 @@ export async function handleModify() {
     ],
   });
 
-  console.log("Field to modify: ", modifyField);
+  // how I want the UI:
+  // Select a new value
+  // Confirm: you want to modify ${field} from ${currentValue} to ${newValue}
 }
 
 export async function handleRemove() {
@@ -128,6 +128,11 @@ export async function handleRemove() {
 
 export async function handleList() {
   const tasks = loadTasks();
+  if (!tasks.length) {
+    console.log("/** No tasks to list **/");
+    return;
+  }
+
   const formattedTasks: String[] = formatTasks(tasks, TaskFormatMode.LABEL);
   formattedTasks.forEach((task) => {
     console.log("------------------------------------------------------------");

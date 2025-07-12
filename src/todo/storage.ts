@@ -19,9 +19,7 @@ export function loadTasks(): Task[] {
 export function saveTasks(tasks: Task[]) {
   try {
     // ensure task is in proper format before saving
-    console.log("Tasks before verify: ", tasks);
     const verifiedTasks = tasks.filter((task) => isValidTask(task));
-    console.log("Stringified tasks: ", JSON.stringify(verifiedTasks));
     fs.writeFileSync(FILE_PATH, JSON.stringify(verifiedTasks));
     console.log("Tasks saved.");
   } catch (err) {
