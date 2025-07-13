@@ -15,6 +15,8 @@ export type Task = {
   isComplete: boolean;
 };
 
+export type TaskModificationHandler = (task: Task) => Promise<boolean>;
+
 // ENUMS
 export const Priority = {
   LOW: "LOW",
@@ -39,7 +41,7 @@ export const Choice = {
 
 export type Choice = (typeof Choice)[keyof typeof Choice];
 
-export const TaskFields = {
+export const TaskField = {
   NAME: "NAME",
   DESCRIPTION: "DESCRIPTION",
   PRIORITY: "PRIORITY",
@@ -47,7 +49,7 @@ export const TaskFields = {
   ISCOMPLETE: "ISCOMPLETE",
 } as const;
 
-export type TaskFields = (typeof TaskFields)[keyof typeof TaskFields];
+export type TaskField = (typeof TaskField)[keyof typeof TaskField];
 
 export const TaskFormatMode = {
   LABEL: "LABEL",

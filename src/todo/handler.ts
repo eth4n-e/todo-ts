@@ -1,11 +1,12 @@
-import { input, rawlist, number, select } from "@inquirer/prompts";
+import { input, rawlist, number, select, confirm } from "@inquirer/prompts";
 import {
-  TaskFields,
+  TaskField,
   Choice,
   Priority,
   TaskData,
   Task,
   TaskFormatMode,
+  TaskModificationHandler,
 } from "./models";
 import { formatTasks } from "./utils/helpers";
 import { loadTasks, saveTasks } from "./storage";
@@ -76,20 +77,32 @@ export async function handleModify() {
     choices: formattedTasks,
   });
 
-  const modifyField = await select({
+  const fieldToModify: TaskField = await select({
     message: "Enter property to modify:",
     choices: [
-      { name: "Name", value: TaskFields.NAME },
-      { name: "Description", value: TaskFields.DESCRIPTION },
-      { name: "Duration", value: TaskFields.DURATION },
-      { name: "Priority", value: TaskFields.PRIORITY },
-      { name: "Completion Status", value: TaskFields.ISCOMPLETE },
+      { name: "Name", value: TaskField.NAME },
+      { name: "Description", value: TaskField.DESCRIPTION },
+      { name: "Duration", value: TaskField.DURATION },
+      { name: "Priority", value: TaskField.PRIORITY },
+      { name: "Completion Status", value: TaskField.ISCOMPLETE },
     ],
   });
 
-  // how I want the UI:
-  // Select a new value
-  // Confirm: you want to modify ${field} from ${currentValue} to ${newValue}
+  // find returns object references
+  const task = tasks.find((task) => task.id === taskIdToModify);
+  if (task) {
+    const isModified = await taskModifyHandlers[fieldToModify](task);
+    if (!isModified) {
+      // short-circuit saving tasks as no modifications have been made to original task list
+      return;
+    }
+  } else {
+    console.error(
+      `Unable to find task ${taskIdToModify}. No modifications made.`,
+    );
+  }
+
+  saveTasks(tasks);
 }
 
 export async function handleRemove() {
@@ -147,11 +160,145 @@ export async function handleSort() {
   const sortBy = await select({
     message: "Enter property to sort by:",
     choices: [
-      { name: "Duration", value: TaskFields.DURATION },
-      { name: "Priority", value: TaskFields.PRIORITY },
-      { name: "Completed", value: TaskFields.ISCOMPLETE },
+      { name: "Duration", value: TaskField.DURATION },
+      { name: "Priority", value: TaskField.PRIORITY },
+      { name: "Completed", value: TaskField.ISCOMPLETE },
     ],
   });
   console.log("Sort option: ", sortBy);
   // sort tasks
 }
+
+// Select a new value
+// Confirm: you want to modify ${field} from ${currentValue} to ${newValue}
+// command registry for each modifiable TaskField
+const taskModifyHandlers: Record<TaskField, TaskModificationHandler> = {
+  NAME: async (task: Task) => {
+    let isModified = false;
+
+    let newName = task.name;
+    while (newName === task.name) {
+      newName = await input({
+        message: "Enter a new name:",
+        required: true,
+      });
+    }
+
+    const modify: boolean = await confirm({
+      message: `Modify name from ${task.name} to ${newName}?`,
+    });
+
+    if (modify) {
+      task.name = newName;
+      isModified = !isModified;
+      console.log("Name modified successfully");
+    } else {
+      console.log("Name unmodified.");
+    }
+
+    return isModified;
+  },
+  DESCRIPTION: async (task: Task) => {
+    let isModified: boolean = false;
+
+    const MAX_LENGTH = 15;
+    const ELLIPSIS = "...";
+
+    let newDescription = task.description;
+    while (newDescription === task.description) {
+      newDescription = await input({
+        message: "Enter a new description:",
+        required: true,
+      });
+    }
+
+    const modify: boolean = await confirm({
+      message: `Modify description from ${task.description.slice(MAX_LENGTH) + ELLIPSIS} to ${newDescription.slice(MAX_LENGTH) + ELLIPSIS}?`,
+    });
+
+    if (modify) {
+      task.description = newDescription;
+      isModified = !isModified;
+      console.log("Description modified successfully");
+    } else {
+      console.log("Description unmodified.");
+    }
+
+    return isModified;
+  },
+  PRIORITY: async (task: Task) => {
+    let isModified: boolean = false;
+
+    const priorityOptions = [
+      { name: "Low", value: Priority.LOW },
+      { name: "Medium", value: Priority.MEDIUM },
+      { name: "High", value: Priority.HIGH },
+    ];
+
+    const newPriorities = priorityOptions.filter(
+      (option) => option.value !== task.priority,
+    );
+
+    const newPriority: Priority = await rawlist({
+      message: "Enter a priority:",
+      choices: newPriorities,
+    });
+
+    const modify: boolean = await confirm({
+      message: `Modify priority from ${task.priority} to ${newPriority}`,
+    });
+
+    if (modify) {
+      task.priority = newPriority;
+      isModified = !isModified;
+      console.log("Priority successfully modified");
+    } else {
+      console.log("Priority unmodified.");
+    }
+
+    return isModified;
+  },
+  DURATION: async (task: Task) => {
+    let isModified = false;
+    let newDuration = task.duration;
+    while (newDuration === task.duration) {
+      newDuration = await number({
+        message: "Enter a new duration (minutes):",
+        required: true,
+        default: 30,
+        min: 0,
+      });
+    }
+
+    const modify = await confirm({
+      message: `Modify duration from ${task.duration} to ${newDuration}?`,
+    });
+
+    if (modify) {
+      task.duration = newDuration;
+      isModified = !isModified;
+      console.log("Duration successfully modified.");
+    } else {
+      console.log("Duration unmodified.");
+    }
+
+    return isModified;
+  },
+  ISCOMPLETE: async (task: Task) => {
+    let isModified = false;
+
+    const modify = await confirm({
+      message: `Modify completion status from ${task.isComplete} to ${!task.isComplete}?`,
+    });
+
+    if (modify) {
+      task.isComplete = !task.isComplete;
+      isModified = !isModified;
+      console.log("Completion status successfully modified.");
+    } else {
+      console.log("Completion status unmodified.");
+    }
+
+    return isModified;
+  },
+};
