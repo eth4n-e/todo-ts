@@ -16,6 +16,7 @@ export type Task = {
 };
 
 export type TaskModificationHandler = (task: Task) => Promise<boolean>;
+export type TaskSortHandler = (tasks: Task[]) => Promise<Task[]>;
 
 // ENUMS
 export const Priority = {
@@ -29,6 +30,12 @@ export const Priority = {
 // (typeof Priority)[keyof typeof Priority] indexes the object
 // result: type Priority = 'low' | 'medium' | 'high';
 export type Priority = (typeof Priority)[keyof typeof Priority];
+
+export const PRIORITY_ORDER = {
+  HIGH: 0,
+  MEDIUM: 1,
+  LOW: 2,
+};
 
 export const Choice = {
   ADD: "ADD",

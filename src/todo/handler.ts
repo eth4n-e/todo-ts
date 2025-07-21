@@ -3,10 +3,12 @@ import {
   TaskField,
   Choice,
   Priority,
+  PRIORITY_ORDER,
   TaskData,
   Task,
   TaskFormatMode,
   TaskModificationHandler,
+  TaskSortHandler,
 } from "./models";
 import { formatTasks } from "./utils/helpers";
 import { loadTasks, saveTasks } from "./storage";
@@ -121,15 +123,6 @@ export async function handleRemove() {
     };
   });
 
-  // might have to call prompt like so
-  //   const { taskIdToRemove } = await inquirer.prompt([
-  //   {
-  //     type: 'rawlist',
-  //     name: 'taskIdToRemove',
-  //     message: 'Select a task to remove:',
-  //     choices: choices
-  //   }
-  // ]);
   const taskIdToRemove: string = await rawlist({
     message: "Select a task to remove:",
     choices: choices,
@@ -155,9 +148,10 @@ export async function handleList() {
 }
 
 export async function handleSort() {
+  let tasks = loadTasks();
   // First prompt should display options to sort by (duration, done, etc.)
   // response to prompt should then be passed
-  const sortBy = await select({
+  const sortBy: TaskField = await select({
     message: "Enter property to sort by:",
     choices: [
       { name: "Duration", value: TaskField.DURATION },
@@ -165,8 +159,16 @@ export async function handleSort() {
       { name: "Completed", value: TaskField.ISCOMPLETE },
     ],
   });
-  console.log("Sort option: ", sortBy);
   // sort tasks
+  // create a function that takes the field to sort by and runs a handler to determine the sort method
+  tasks = await taskSortHandlers[sortBy](tasks);
+
+  const formattedTasks: String[] = formatTasks(tasks, TaskFormatMode.LABEL);
+  formattedTasks.forEach((task) => {
+    console.log("------------------------------------------------------------");
+    console.log(task);
+    console.log("------------------------------------------------------------");
+  });
 }
 
 // Select a new value
@@ -300,5 +302,33 @@ const taskModifyHandlers: Record<TaskField, TaskModificationHandler> = {
     }
 
     return isModified;
+  },
+};
+
+/*
+ * Sort reminder:
+ * a - b > 0 -> a comes after b in array
+ * a - b < 0 -> a comes before b in array
+ * a - b == 0 > keep original order
+ */
+const taskSortHandlers: Record<TaskField, TaskSortHandler> = {
+  DURATION: async (tasks: Task[]) => {
+    return tasks.sort((t1, t2) => t1.duration - t2.duration);
+  },
+  PRIORITY: async (tasks: Task[]) => {
+    return tasks.sort(
+      (t1, t2) => PRIORITY_ORDER[t1.priority] - PRIORITY_ORDER[t2.priority],
+    );
+  },
+  ISCOMPLETE: async (tasks: Task[]) => {
+    return tasks.sort(
+      (t1, t2) => Number(t1.isComplete) - Number(t2.isComplete),
+    );
+  },
+  NAME: async (tasks: Task[]) => {
+    return tasks;
+  },
+  DESCRIPTION: async (tasks: Task[]) => {
+    return tasks;
   },
 };
