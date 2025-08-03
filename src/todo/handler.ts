@@ -1,6 +1,7 @@
 import { input, rawlist, number, select, confirm } from "@inquirer/prompts";
 import {
   TaskField,
+  TaskFieldPromptOption,
   Choice,
   Priority,
   PRIORITY_ORDER,
@@ -79,14 +80,16 @@ export async function handleModify() {
     choices: formattedTasks,
   });
 
-  const fieldToModify: TaskField = await select({
+  const fieldToModify: TaskFieldPromptOption = await select({
     message: "Enter property to modify:",
     choices: [
-      { name: "Name", value: TaskField.NAME },
-      { name: "Description", value: TaskField.DESCRIPTION },
-      { name: "Duration", value: TaskField.DURATION },
-      { name: "Priority", value: TaskField.PRIORITY },
-      { name: "Completion Status", value: TaskField.ISCOMPLETE },
+      // * TODO: this could maybe be a map -> e.g. TaskChoiceMap<name, value>
+      { name: "Name", value: TaskFieldPromptOption.NAME },
+      { name: "Description", value: TaskFieldPromptOption.DESCRIPTION },
+      { name: "Duration", value: TaskFieldPromptOption.DURATION },
+      { name: "Priority", value: TaskFieldPromptOption.PRIORITY },
+      { name: "Completion Status", value: TaskFieldPromptOption.ISCOMPLETE },
+      { name: "Exit", value: TaskFieldPromptOption.EXIT },
     ],
   });
 
@@ -108,20 +111,9 @@ export async function handleModify() {
 }
 
 export async function handleRemove() {
-  /*
-   * Steps:
-   * 1) List all tasks to be removed
-   * 2) Format: id, description, done
-   */
-
   const tasks: Task[] = loadTasks();
 
-  const choices = tasks.map((task) => {
-    return {
-      name: `Name: ${task.name} | Priority: ${task.priority} | Completed: ${task.isComplete}`,
-      value: task.id,
-    };
-  });
+  const choices = formatTasks(tasks, TaskFormatMode.CHOICE);
 
   const taskIdToRemove: string = await rawlist({
     message: "Select a task to remove:",
@@ -132,6 +124,7 @@ export async function handleRemove() {
   saveTasks(updatedTasks);
 }
 
+// TODO:: think about refactoring method to take in the list of tasks as a parameter
 export async function handleList() {
   const tasks = loadTasks();
   if (!tasks.length) {
@@ -140,10 +133,14 @@ export async function handleList() {
   }
 
   const formattedTasks: String[] = formatTasks(tasks, TaskFormatMode.LABEL);
-  formattedTasks.forEach((task) => {
+  formattedTasks.forEach((task, idx) => {
     console.log("------------------------------------------------------------");
     console.log(task);
-    console.log("------------------------------------------------------------");
+    idx === formattedTasks.length - 1
+      ? console.log(
+          "------------------------------------------------------------\n",
+        )
+      : "";
   });
 }
 
@@ -164,17 +161,24 @@ export async function handleSort() {
   tasks = await taskSortHandlers[sortBy](tasks);
 
   const formattedTasks: String[] = formatTasks(tasks, TaskFormatMode.LABEL);
-  formattedTasks.forEach((task) => {
+  formattedTasks.forEach((task, idx) => {
     console.log("------------------------------------------------------------");
     console.log(task);
-    console.log("------------------------------------------------------------");
+    idx === formattedTasks.length - 1
+      ? console.log(
+          "------------------------------------------------------------",
+        )
+      : "";
   });
 }
 
 // Select a new value
 // Confirm: you want to modify ${field} from ${currentValue} to ${newValue}
 // command registry for each modifiable TaskField
-const taskModifyHandlers: Record<TaskField, TaskModificationHandler> = {
+const taskModifyHandlers: Record<
+  TaskFieldPromptOption,
+  TaskModificationHandler
+> = {
   NAME: async (task: Task) => {
     let isModified = false;
 
@@ -215,7 +219,7 @@ const taskModifyHandlers: Record<TaskField, TaskModificationHandler> = {
     }
 
     const modify: boolean = await confirm({
-      message: `Modify description from ${task.description.slice(MAX_LENGTH) + ELLIPSIS} to ${newDescription.slice(MAX_LENGTH) + ELLIPSIS}?`,
+      message: `Modify description from ${task.description.slice(0, MAX_LENGTH) + ELLIPSIS} to ${newDescription.slice(0, MAX_LENGTH) + ELLIPSIS}?`,
     });
 
     if (modify) {
@@ -302,6 +306,10 @@ const taskModifyHandlers: Record<TaskField, TaskModificationHandler> = {
     }
 
     return isModified;
+  },
+  EXIT: async (task) => {
+    console.log(`Exiting without modifying ${task.name}`);
+    return false;
   },
 };
 

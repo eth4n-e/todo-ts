@@ -11,9 +11,9 @@ export function formatTasks(
 // Implementation - defines *what* actually happens
 export function formatTasks(tasks: Task[], mode: TaskFormatMode): unknown {
   return tasks.map((task) => {
-    const label = `Name: ${task.name} | Priority: ${task.priority} | Completed: ${task.isComplete}`;
+    const label = `Name: ${task.name}\nDescription: ${task.description}\nDuration: ${task.duration}\nPriority: ${task.priority}\nCompleted: ${task.isComplete}`;
     return mode === TaskFormatMode.LABEL
       ? label
-      : { name: label, value: task.id };
+      : { name: task.name, value: task.id };
   });
 }

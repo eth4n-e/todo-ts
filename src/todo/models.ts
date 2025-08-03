@@ -58,6 +58,14 @@ export const TaskField = {
 
 export type TaskField = (typeof TaskField)[keyof typeof TaskField];
 
+export const TaskFieldPromptOption = {
+  ...TaskField,
+  EXIT: "EXIT",
+} as const;
+
+export type TaskFieldPromptOption =
+  (typeof TaskFieldPromptOption)[keyof typeof TaskFieldPromptOption];
+
 export const TaskFormatMode = {
   LABEL: "LABEL",
   CHOICE: "CHOICE",
